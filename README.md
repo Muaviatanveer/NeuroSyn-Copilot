@@ -33,7 +33,7 @@
 [![Local LLM: Ollama](https://img.shields.io/badge/Local_LLM-Ollama_%C2%B7_Qwen-8B5CF6?style=for-the-badge)](https://ollama.com/)
 [![Stack: Vite](https://img.shields.io/badge/Stack-React_%C2%B7_Vite_%C2%B7_Tailwind-0EA5E9?style=for-the-badge)](https://vitejs.dev/)
 
-**[▶ Demo Video](https://github.com/Muaviatanveer/NeuroSyn-Copilot)** · **[🌐 Live Workspace](https://neurosyn-copilot.onrender.com/)** · **[📊 Pitch Deck](https://github.com/Muaviatanveer/NeuroSyn-Copilot)**
+**[▶ Demo Video](https://drive.google.com/file/d/10ms4rgy1t8nZPzpwsmLCsUeWFR542L48/view?usp=sharing)** · **[🌐 Live Workspace](http://neurosyn-dev.onrender.com)** · **[📊 Pitch Deck](https://drive.google.com/file/d/1T-SSrwxPTh-1PT9M7nAa6lwvOQq7Zh1T/view?usp=sharing)**
 
 <br/>
 
@@ -56,6 +56,7 @@
 [![NeuroScore](https://img.shields.io/badge/NeuroScore-10B981?style=flat-square)](#neuroscore)
 [![Structure](https://img.shields.io/badge/Structure-06B6D4?style=flat-square)](#structure)
 [![Stack](https://img.shields.io/badge/Stack-8B5CF6?style=flat-square)](#stack)
+[![CLI](https://img.shields.io/badge/CLI-10B981?style=flat-square)](#cli)
 [![Install](https://img.shields.io/badge/Install-10B981?style=flat-square)](#installation)
 [![Demo](https://img.shields.io/badge/Demo-06B6D4?style=flat-square)](#demo)
 [![Roadmap](https://img.shields.io/badge/Roadmap-8B5CF6?style=flat-square)](#roadmap)
@@ -235,11 +236,123 @@ NeuroSyn-Copilot/
 </tr>
 </table>
 
+<a name="cli"></a>
+
+## 💻 NeuroSyn CLI
+
+NeuroSyn-Copilot is distributed as a professional Command Line Interface (CLI), letting you install, configure, and launch the complete AI workspace with a single command. Unlike traditional applications that require cloning a repository and manually configuring environments, the NeuroSyn CLI automates the entire setup process.
+
+### Installation
+
+```bash
+npx -p neurosyn-copilot-os neurosyn-copilot
+```
+
+No global installation or repository cloning is required.
+
+### What Happens Automatically?
+
+After running the command, the CLI performs the complete bootstrap process:
+
+- Downloads the latest NeuroSyn-Copilot package from npm
+- Validates the local runtime environment
+- Checks Node.js compatibility
+- Verifies Ollama availability
+- Connects to the local MongoDB instance
+- Installs frontend and backend dependencies (first launch only)
+- Builds the React production application
+- Starts the unified Express server
+- Opens the NeuroSyn-Copilot workspace automatically in the default browser
+
+### Runtime Lifecycle
+
+```text
+NPM Registry
+      │
+      ▼
+Package Download
+      │
+      ▼
+Environment Validation
+      │
+      ▼
+Dependency Installation
+      │
+      ▼
+Frontend Build
+      │
+      ▼
+Backend Launch
+      │
+      ▼
+Browser Opens
+      │
+      ▼
+AI Workspace Ready
+```
+
+### Local AI Execution
+
+After launch, all document processing takes place inside the local AI workspace:
+
+```text
+Upload Document
+      │
+      ▼
+Document Parsing
+      │
+      ▼
+AI Workforce Execution
+      │
+      ▼
+Business Analysis
+      │
+      ▼
+Report Generation
+      │
+      ▼
+Executive Deliverables
+```
+
+### Generated Outputs
+
+The CLI automatically orchestrates the complete generation pipeline and produces:
+
+- Executive Dashboard
+- Business Insights
+- PDF Reports
+- PowerPoint Presentations
+- Microsoft Word Reports
+- Business Charts
+- ZIP Export Package
+
+### CLI Features
+
+| Feature | Description |
+| :--- | :--- |
+| 🚀 One-Command Launch | Launch the complete AI workspace with a single command |
+| 🔍 Environment Validation | Automatically checks Node.js, Ollama, and MongoDB |
+| 📦 Auto Dependency Installation | Installs required packages on first run |
+| ⚙️ Automatic Build | Builds the React frontend automatically |
+| 🌐 Browser Auto Launch | Opens the dashboard after startup |
+| 🤖 Local AI Execution | Runs AI workflows using the local model |
+| 📄 Multi-Format Output | Generates PDF, DOCX, PPTX, charts, and ZIP packages |
+
+### Zero-Configuration Experience
+
+The NeuroSyn CLI removes the complexity of local deployment by automating environment validation, dependency installation, application startup, and browser launch — providing a seamless developer experience with a single command.
+
+```bash
+npx -p neurosyn-copilot-os neurosyn-copilot
+```
+
+One command is all that's required to launch the complete AI Workforce.
+
 <a name="installation"></a>
 
 ## 🚀 Local Installation & Verification
 
-Follow these steps to run the workspace on macOS.
+Prefer manual control, or need to run the frontend and backend separately for development? Here's the full step-by-step setup the CLI above runs automatically.
 
 <details>
 <summary><strong>1. Prerequisite — Local MongoDB & Ollama</strong></summary>
@@ -344,7 +457,7 @@ db.users.find()   // Verify authorized profiles
 ## 👥 Core Project Team
 
 **Muavia Tanveer** — Full-Stack AI Engineer & UI Architect
-[GitHub](https://github.com/Muaviatanveer) · [LinkedIn](#)
+[GitHub](https://github.com/Muaviatanveer) · [LinkedIn](https://www.linkedin.com/in/muavia-tanveer-9a6856328/)
 
 <a name="license"></a>
 
