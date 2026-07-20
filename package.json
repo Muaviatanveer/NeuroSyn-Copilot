@@ -3,10 +3,8 @@
   "version": "3.0.0",
   "description": "Engineering Intelligence OS",
   "type": "module",
-  "main": "backend/app.js",
   "scripts": {
-    "start": "node backend/app.js",
-    "build": "cd frontend && npm install && npm run build && cd ../backend && npm install"
-  },
-  "dependencies": {}
+    "build": "npm --prefix backend install && npm --prefix frontend install && npm --prefix frontend run build",
+    "start": "cd backend && node app.js"
+  }
 }
