@@ -13,14 +13,13 @@ const modelName = isOpenAIActive
   ? (process.env.OPENAI_MODEL || 'gpt-4o-mini') 
   : (process.env.LOCAL_LLM_MODEL || 'deepseek-r1:14b');
 
-// Initialize the client with standard parameters and custom ngrok-bypass headers
+// Initialize the client with standard parameters and custom tunnel-bypass headers
 const client = new OpenAI({
   baseURL,
   apiKey: process.env.OPENAI_API_KEY || 'local-no-key-required',
-  // Inject the custom ngrok-skip-browser-warning header
-  // This instructs ngrok to bypass the HTML interstitial page and route directly to Ollama
   defaultHeaders: {
-    'ngrok-skip-browser-warning': 'true'
+    'ngrok-skip-browser-warning': 'true',     // Bypasses Ngrok interstitial blocks
+    'Bypass-Tunnel-Reminder': 'true'          // Bypasses Localtunnel interstitial blocks
   }
 });
 
