@@ -1,0 +1,5 @@
+node_modules/
+workspace/uploads/*
+workspace/outputs/*
+.env
+neurosyn-server.log

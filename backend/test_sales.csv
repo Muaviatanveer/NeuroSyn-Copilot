@@ -1,0 +1,11 @@
+Date,Region,Product,Units_Sold,Revenue,Cost,Customer_Satisfaction
+2026-01-01,Region A,"Enterprise CRM",120,60000,18000,4.8
+2026-01-02,Region B,"Enterprise CRM",45,22500,11250,3.2
+2026-01-03,Region C,"Cloud Hosting",310,93000,46500,4.5
+2026-01-04,Region A,"Cloud Hosting",140,42000,21000,4.7
+2026-01-05,Region B,"Security Suite",85,51000,45900,3.1
+2026-01-06,Region C,"Security Suite",200,120000,48000,4.9
+2026-01-07,Region A,"API Gateway",150,30000,9000,4.6
+2026-01-08,Region B,"API Gateway",40,8000,3200,2.9
+2026-01-09,Region C,"AI Copilot Core",500,150000,45000,4.9
+2026-01-10,Region A,"AI Copilot Core",250,75000,22500,4.8
