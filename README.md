@@ -33,7 +33,7 @@
 [![Local LLM: Ollama](https://img.shields.io/badge/Local_LLM-Ollama_%C2%B7_Qwen-8B5CF6?style=for-the-badge)](https://ollama.com/)
 [![Stack: Vite](https://img.shields.io/badge/Stack-React_%C2%B7_Vite_%C2%B7_Tailwind-0EA5E9?style=for-the-badge)](https://vitejs.dev/)
 
-**[▶ Demo Video](https://github.com/Muaviatanveer/NeuroSyn-Copilot)** · **[🌐 Live Workspace](http://neurosyn-dev.onrender.com)** · **[📊 Pitch Deck](https://github.com/Muaviatanveer/NeuroSyn-Copilot)**
+**[▶ Demo Video](https://github.com/Muaviatanveer/NeuroSyn-Copilot)** · **[🌐 Live Workspace](https://neurosyn-copilot.onrender.com/)** · **[📊 Pitch Deck](https://github.com/Muaviatanveer/NeuroSyn-Copilot)**
 
 <br/>
 
