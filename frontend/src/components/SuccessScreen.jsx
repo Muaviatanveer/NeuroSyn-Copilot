@@ -10,7 +10,9 @@ export function SuccessScreen({ artifacts, neuroScore, onReset }) {
   
   if (!artifacts) return null;
 
-  // Dynamically compile active score metrics (read from backend evaluation)
+  // Unified relative path resolves directly to active Vercel static assets
+  const backendBase = '';
+
   const scorePercent = neuroScore?.score || 96.4;
   const breakdown = neuroScore?.breakdown || { quality: 98, parsing: 100, analysis: 94, visuals: 98, compilers: 100 };
   const factors = neuroScore?.factors || [
@@ -21,7 +23,6 @@ export function SuccessScreen({ artifacts, neuroScore, onReset }) {
     '✓ 100% complete dataset cells verified'
   ];
 
-  const backendBase = '';
   const downloadCards = [
     { name: 'Executive Report.pdf', format: 'PDF Document', path: `${backendBase}${artifacts.pdfUrl}`, icon: FileText, color: '#EF4444' },
     { name: 'Pitch Presentation.pptx', format: 'PowerPoint Deck', path: `${backendBase}${artifacts.pptxUrl}`, icon: Presentation, color: '#F59E0B' },
@@ -45,7 +46,7 @@ export function SuccessScreen({ artifacts, neuroScore, onReset }) {
       exit={{ opacity: 0, scale: 0.98 }}
       className="max-w-4xl mx-auto space-y-6 py-4 font-mono select-none"
     >
-      {/* Dynamic Header */}
+      {/* Header */}
       <div className="text-center space-y-2">
         <div className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-[#10B981]/5 text-[#10B981] mb-1 border border-[#10B981]/15">
           <CheckCircle2 className="w-6 h-6 animate-bounce" />
@@ -56,10 +57,8 @@ export function SuccessScreen({ artifacts, neuroScore, onReset }) {
         </p>
       </div>
 
-      {/* 1. NEW "NEUROSCORE™" CONFIDENCE ENGINE SCORING CARD */}
+      {/* NeuroScore™ Card */}
       <div className="grid grid-cols-1 md:grid-cols-10 gap-5">
-        
-        {/* Left Side: Score progress meter */}
         <div className="md:col-span-4 glass-card p-5 rounded-12 flex flex-col justify-between space-y-5 bg-[#0D0D0F]/80">
           <div className="space-y-1">
             <span className="text-[9px] font-bold text-[#A1A1AA] uppercase tracking-wider block">NeuroScore™ Trust Index</span>
@@ -69,7 +68,6 @@ export function SuccessScreen({ artifacts, neuroScore, onReset }) {
             </div>
           </div>
 
-          {/* Progressive slide indicator */}
           <div className="space-y-2.5">
             <div className="flex justify-between text-[9px] font-mono text-[#71717A]">
               <span>LOW</span>
@@ -90,7 +88,6 @@ export function SuccessScreen({ artifacts, neuroScore, onReset }) {
           </div>
         </div>
 
-        {/* Right Side: Dynamic Validation Checklist and Granular breakdown */}
         <div className="md:col-span-6 glass-card p-5 rounded-12 flex flex-col justify-between space-y-4">
           <div className="space-y-2">
             <span className="text-[9px] font-bold text-[#A1A1AA] uppercase tracking-wider block">Ingestion Integrity Factors</span>
@@ -107,7 +104,6 @@ export function SuccessScreen({ artifacts, neuroScore, onReset }) {
             </div>
           </div>
 
-          {/* Micro breakdown indicators */}
           <div className="grid grid-cols-5 gap-2 text-[9px] pt-3 border-t border-[#1E1E22] text-[#71717A] text-center">
             <div>
               <span className="font-bold text-[#FAFAFA] block">{breakdown.quality}%</span>
@@ -131,10 +127,9 @@ export function SuccessScreen({ artifacts, neuroScore, onReset }) {
             </div>
           </div>
         </div>
-
       </div>
 
-      {/* 2. Compiled Documents Card Downloads Grid */}
+      {/* Compiled Documents Card Downloads Grid */}
       <div className="space-y-3">
         <h3 className="text-[9px] font-bold uppercase tracking-wider text-[#A1A1AA]">Compiled Work Artifacts</h3>
         <div className="grid grid-cols-2 gap-4">
@@ -168,7 +163,7 @@ export function SuccessScreen({ artifacts, neuroScore, onReset }) {
         </div>
       </div>
 
-      {/* 3. Communications Draft Copy Panel */}
+      {/* Communications Draft Copy Panel */}
       <div className="glass-card p-5 rounded-12 space-y-4">
         <div className="flex justify-between items-center">
           <h3 className="text-[9px] font-bold uppercase tracking-wider text-[#71717A] flex items-center gap-2">

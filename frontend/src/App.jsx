@@ -9,6 +9,7 @@ import { ExecutionTimeline } from './components/ExecutionTimeline';
 import { SuccessScreen } from './components/SuccessScreen';
 import { LoginPage } from './components/LoginPage';
 
+// Unified relative path (resolves locally to port 3000 -> 5001 and on Vercel to your live domain)
 const API_BASE = '/api';
 
 export default function App() {
@@ -27,7 +28,7 @@ export default function App() {
     parsedData: null,
     timelineSteps: [],
     artifacts: null,
-    neuroScore: null // Added dynamic NeuroScore state
+    neuroScore: null
   });
 
   const [promptInput, setPromptInput] = useState('');
@@ -171,6 +172,7 @@ export default function App() {
     }
 
     setSessionState(prev => ({ ...prev, status: 'analyzing' }));
+    
     const eventSource = new EventSource(`${API_BASE}/execute/${sessionState.sessionId}?userId=${currentUser.googleId}`);
 
     eventSource.addEventListener('timeline', (event) => {
@@ -203,7 +205,7 @@ export default function App() {
           status: 'completed',
           timelineSteps: state.steps,
           artifacts: state.artifacts,
-          neuroScore: state.neuroScore // Scoped inside app state
+          neuroScore: state.neuroScore
         };
       });
       
@@ -305,7 +307,7 @@ export default function App() {
               <SuccessScreen 
                 key="success" 
                 artifacts={sessionState.artifacts} 
-                neuroScore={sessionState.neuroScore} // <-- Pass down to SuccessScreen
+                neuroScore={sessionState.neuroScore}
                 onReset={() => setSessionState({
                   sessionId: null,
                   status: 'idle',
