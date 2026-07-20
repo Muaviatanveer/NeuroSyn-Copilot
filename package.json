@@ -1,5 +1,12 @@
 {
-  "dependencies": {
-    "google-auth-library": "^10.9.0"
-  }
+  "name": "neurosyn-copilot",
+  "version": "3.0.0",
+  "description": "Engineering Intelligence OS",
+  "type": "module",
+  "main": "backend/app.js",
+  "scripts": {
+    "start": "node backend/app.js",
+    "build": "cd frontend && npm install && npm run build && cd ../backend && npm install"
+  },
+  "dependencies": {}
 }
