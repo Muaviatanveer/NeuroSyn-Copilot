@@ -34,12 +34,21 @@ router.get('/:sessionId', async (req, res) => {
   workflow.initializeSteps('data_report');
 
   try {
-    const parsedPath = path.join(config.paths.uploads, sessionId, 'parsed.json');
-    if (!fs.existsSync(parsedPath)) {
-      throw new Error('Workspace cache expired or parsed.json was not found.');
+    // Read from global memory cache first (Vercel Serverless safe)
+    let dataset = null;
+    if (global.workspaceCache && global.workspaceCache[sessionId]) {
+      dataset = global.workspaceCache[sessionId];
+    } else {
+      // Fallback to local disk (Local MacBook Dev safe)
+      const parsedPath = path.join(config.paths.uploads, sessionId, 'parsed.json');
+      if (fs.existsSync(parsedPath)) {
+        dataset = JSON.parse(fs.readFileSync(parsedPath, 'utf8'));
+      }
     }
-    
-    const dataset = JSON.parse(fs.readFileSync(parsedPath, 'utf8'));
+
+    if (!dataset) {
+      throw new Error('Workspace cache expired. Please upload the file again.');
+    }
 
     // 1. Data Analyst Phase
     workflow.updateStepStatus('parsing', 'completed');
@@ -95,9 +104,7 @@ router.get('/:sessionId', async (req, res) => {
       zipUrl: `/static/outputs/${sessionId}/${path.basename(zipPath)}`
     };
 
-    // -------------------------------------------------------------
-    // DYNAMIC NEUROSCORE™ CONFIDENCE ENGINE CALCULATOR
-    // -------------------------------------------------------------
+    // Calculate NeuroScore™
     let emptyCellsCount = 0;
     if (dataset.sheets && dataset.sheets[0]) {
       dataset.sheets[0].rows.forEach(row => {
@@ -109,14 +116,12 @@ router.get('/:sessionId', async (req, res) => {
       });
     }
 
-    // Dynamic metrics compilation
     const dataQuality = dataset.sheets ? Math.max(75, 100 - emptyCellsCount) : 96;
     const parsingSuccess = 100;
     const aiAnalysis = 94;
     const visualizationSuccess = chartPaths.length > 0 ? 98 : 0;
     const exportSuccess = zipPath ? 100 : 0;
 
-    // Relative weighted NeuroScore Formula calculation
     const overallConfidence = Number((
       0.30 * dataQuality + 
       0.20 * parsingSuccess + 
@@ -179,13 +184,18 @@ router.get('/:sessionId', async (req, res) => {
       fileSize: originalSize,
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       artifacts: fileResponsePayload,
-      neuroScore // Saved persistently to MongoDB
+      neuroScore 
     });
+
+    // Clear cache safely
+    if (global.workspaceCache) {
+      delete global.workspaceCache[sessionId];
+    }
 
     sendSSEEvent('done', {
       ...workflow.getTimelineState(),
       artifacts: fileResponsePayload,
-      neuroScore // Transmitted to the frontend
+      neuroScore
     });
 
   } catch (error) {

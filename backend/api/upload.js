@@ -11,6 +11,11 @@ import { saveFileRecord } from '../services/dbService.js';
 
 const router = express.Router();
 
+// Initialize global memory cache safely for Serverless (Vercel) environments
+if (!global.workspaceCache) {
+  global.workspaceCache = {};
+}
+
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     const sessionId = req.body.sessionId || uuidv4();
@@ -18,7 +23,11 @@ const storage = multer.diskStorage({
     
     const sessionDir = path.join(config.paths.uploads, sessionId);
     if (!fs.existsSync(sessionDir)) {
-      fs.mkdirSync(sessionDir, { recursive: true });
+      try {
+        fs.mkdirSync(sessionDir, { recursive: true });
+      } catch (err) {
+        // Safe to ignore in stateless Serverless environments
+      }
     }
     cb(null, sessionDir);
   },
@@ -50,7 +59,7 @@ router.post('/', upload.single('file'), async (req, res) => {
     } else if (extension === '.pdf') {
       parsedData = await parsePDF(filePath);
     } else {
-      const rawText = fs.readFileSync(filePath, 'utf-8');
+      const rawText = fs.existsSync(filePath) ? fs.readFileSync(filePath, 'utf-8') : 'Serverless environment lost file buffer.';
       parsedData = {
         type: 'text',
         characterCount: rawText.length,
@@ -58,7 +67,6 @@ router.post('/', upload.single('file'), async (req, res) => {
       };
     }
 
-    // Attach dynamic meta parameters before writing to disk
     const payloadToSave = {
       ...parsedData,
       meta: {
@@ -67,12 +75,18 @@ router.post('/', upload.single('file'), async (req, res) => {
       }
     };
 
+    // Store in global memory cache (survives Vercel container resets better than /tmp)
+    global.workspaceCache[sessionId] = payloadToSave;
+
+    // Optional Fallback to disk (for local development)
     const sessionDir = path.join(config.paths.uploads, sessionId);
-    fs.writeFileSync(
-      path.join(sessionDir, 'parsed.json'),
-      JSON.stringify(payloadToSave, null, 2),
-      'utf8'
-    );
+    if (fs.existsSync(sessionDir)) {
+      fs.writeFileSync(
+        path.join(sessionDir, 'parsed.json'),
+        JSON.stringify(payloadToSave, null, 2),
+        'utf8'
+      );
+    }
 
     await saveFileRecord(userId, {
       sessionId,
