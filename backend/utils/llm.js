@@ -3,30 +3,40 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-const isOpenAIActive = !!process.env.OPENAI_API_KEY;
+const isGeminiActive = !!process.env.GEMINI_API_KEY;
+const isOpenAIActive = !isGeminiActive && !!process.env.OPENAI_API_KEY;
 
-const baseURL = isOpenAIActive 
-  ? 'https://api.openai.com/v1' 
-  : (process.env.LOCAL_LLM_BASE_URL || 'http://localhost:11434/v1');
+// 1. Resolve base URL dynamically
+const baseURL = isGeminiActive
+  ? 'https://generativelanguage.googleapis.com/v1beta/openai' // Gemini OpenAI-Compatible Endpoint
+  : isOpenAIActive
+    ? 'https://api.openai.com/v1'
+    : (process.env.LOCAL_LLM_BASE_URL || 'http://localhost:11434/v1');
 
-const modelName = isOpenAIActive 
-  ? (process.env.OPENAI_MODEL || 'gpt-4o-mini') 
-  : (process.env.LOCAL_LLM_MODEL || 'deepseek-r1:14b');
+// 2. Resolve target model name dynamically
+const modelName = isGeminiActive
+  ? (process.env.GEMINI_MODEL || 'gemini-3.5-flash') // Fast, high-accuracy model
+  : isOpenAIActive
+    ? (process.env.OPENAI_MODEL || 'gpt-4o-mini')
+    : (process.env.LOCAL_LLM_MODEL || 'deepseek-r1:14b');
 
-// Initialize the client with standard parameters and custom tunnel-bypass headers
+// 3. Resolve API Key
+const apiKey = isGeminiActive
+  ? process.env.GEMINI_API_KEY
+  : (process.env.OPENAI_API_KEY || 'local-no-key-required');
+
+// Initialize the OpenAI client pointing to the determined cloud or local provider
 const client = new OpenAI({
   baseURL,
-  apiKey: process.env.OPENAI_API_KEY || 'local-no-key-required',
+  apiKey,
   defaultHeaders: {
-    'ngrok-skip-browser-warning': 'true',     // Bypasses Ngrok interstitial blocks
-    'Bypass-Tunnel-Reminder': 'true'          // Bypasses Localtunnel interstitial blocks
+    'ngrok-skip-browser-warning': 'true',
+    'Bypass-Tunnel-Reminder': 'true'
   }
 });
 
 /**
- * Sends a chat completion request to either the local Ollama instance or OpenAI cloud models.
- * @param {Array} messages - Standard chat messages array [{role: 'user', content: '...'}]
- * @param {Object} options - Additional configurations (temperature, response_format, etc.)
+ * Sends a chat completion request to Gemini, OpenAI, or local Ollama.
  */
 export async function getLocalLLMCompletion(messages, options = {}) {
   try {
@@ -48,5 +58,5 @@ export async function getLocalLLMCompletion(messages, options = {}) {
 export const llmConfig = {
   baseURL,
   modelName,
-  isOpenAIActive
+  isCloudActive: isGeminiActive || isOpenAIActive
 };
