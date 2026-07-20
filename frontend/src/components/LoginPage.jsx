@@ -8,7 +8,6 @@ export function LoginPage({ onLoginSuccess }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  // System Console Logs State
   const [consoleLines, setConsoleLogs] = useState([]);
   const [logIndex, setLogIndex] = useState(0);
 
@@ -41,6 +40,7 @@ export function LoginPage({ onLoginSuccess }) {
       /* global google */
       if (window.google) {
         google.accounts.id.initialize({
+          // UPDATED: Placed your real verified Google Client ID here
           client_id: '430589265444-hls1guitmiv2nmbp2fighqu14tvj7jmp.apps.googleusercontent.com',
           callback: handleCredentialResponse,
         });
@@ -51,7 +51,7 @@ export function LoginPage({ onLoginSuccess }) {
           { 
             theme: 'dark', 
             size: 'large', 
-            width: '382', // Symmetrical alignment matching the card width
+            width: '382', 
             shape: 'rectangular'
           }
         );
@@ -82,7 +82,6 @@ export function LoginPage({ onLoginSuccess }) {
     }
   };
 
-  // Safe Developer Bypass (100% uptime for local hackathon evaluations)
   const triggerDemoBypass = async () => {
     setLoading(true);
     setError(null);
@@ -142,7 +141,7 @@ export function LoginPage({ onLoginSuccess }) {
       {/* Background vector dot-grid */}
       <div className="absolute inset-0 bg-blueprint-bg opacity-30 pointer-events-none" />
 
-      {/* Main Split Grid (col-span-10 split: Left 6 / Right 4) */}
+      {/* Main Split Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-10 gap-12 w-full max-w-7xl mx-auto my-auto z-10 relative">
         
         {/* LEFT COLUMN - TELEMETRY & ARCHITECTURE PIPELINE */}
@@ -276,7 +275,7 @@ export function LoginPage({ onLoginSuccess }) {
                   {/* Relative container holding our custom button + overlapping invisible Google iframe */}
                   <div className="relative w-full h-14 overflow-hidden rounded-14">
                     
-                    {/* 1. Our Gorgeous Custom styled White Button */}
+                    {/* Our Custom styled White Button */}
                     <button 
                       className="absolute inset-0 w-full h-full bg-[#FAFAFA] hover:bg-[#E4E4E7] text-black font-semibold text-xs transition-all duration-150 flex items-center justify-center gap-3 z-0"
                     >
@@ -289,7 +288,7 @@ export function LoginPage({ onLoginSuccess }) {
                       <span>Continue with Google</span>
                     </button>
 
-                    {/* 2. Official Google Iframe container overlaying directly on top of ours with near-zero opacity */}
+                    {/* Official Google Iframe container overlaying directly on top of ours */}
                     <div 
                       id="ghost-google-btn-container" 
                       className="absolute inset-0 opacity-[0.01] hover:opacity-[0.02] cursor-pointer z-10 flex justify-center items-center overflow-hidden" 

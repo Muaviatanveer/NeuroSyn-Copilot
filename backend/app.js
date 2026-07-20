@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import path from 'path';
+import fs from 'fs';
 import { config } from './utils/config.js';
 import { logger } from './utils/logger.js';
 import { connectDB } from './utils/db.js';
@@ -10,7 +11,7 @@ import uploadRouter from './api/upload.js';
 import executeRouter from './api/execute.js';
 import downloadRouter from './api/download.js';
 import historyRouter from './api/history.js';
-import authRouter from './api/auth.js'; // <-- Added authentication router import
+import authRouter from './api/auth.js';
 
 const app = express();
 
@@ -30,12 +31,16 @@ app.use('/api/upload', uploadRouter);
 app.use('/api/execute', executeRouter);
 app.use('/api/download', downloadRouter);
 app.use('/api/history', historyRouter);
-app.use('/api/auth', authRouter); // <-- Mounted authentication router endpoint
+app.use('/api/auth', authRouter);
 
-// Initialize MongoDB on boot
-connectDB().then(() => {
-  logger.info('System', 'Persistent database routing initialized.');
-});
+// Initialize MongoDB safely on boot to prevent serverless lambda crashes
+connectDB()
+  .then(() => {
+    logger.info('System', 'Persistent database routing initialized.');
+  })
+  .catch((err) => {
+    logger.error('System', 'Failed to initialize database on boot.', err);
+  });
 
 app.get('/health', (req, res) => {
   res.status(200).json({
