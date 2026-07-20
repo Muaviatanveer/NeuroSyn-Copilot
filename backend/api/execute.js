@@ -8,10 +8,8 @@ import { generateExecutiveDOCX } from '../generators/docx.js';
 import { generatePresentationPPT } from '../generators/ppt.js';
 import { createSessionZipArchive } from '../utils/zipper.js';
 import { SessionWorkflow } from '../services/workflow.js';
-import { saveHistoryRecord } from '../services/dbService.js';
+import { saveHistoryRecord, getCachedSessionData } from '../services/dbService.js'; // Added fetch import
 import { connectDB } from '../utils/db.js';
-import { config } from '../utils/config.js';
-import fs from 'fs';
 import path from 'path';
 
 const router = express.Router();
@@ -34,23 +32,13 @@ router.get('/:sessionId', async (req, res) => {
   workflow.initializeSteps('data_report');
 
   try {
-    // Read from global memory cache first (Vercel Serverless safe)
-    let dataset = null;
-    if (global.workspaceCache && global.workspaceCache[sessionId]) {
-      dataset = global.workspaceCache[sessionId];
-    } else {
-      // Fallback to local disk (Local MacBook Dev safe)
-      const parsedPath = path.join(config.paths.uploads, sessionId, 'parsed.json');
-      if (fs.existsSync(parsedPath)) {
-        dataset = JSON.parse(fs.readFileSync(parsedPath, 'utf8'));
-      }
-    }
+    // 1. FETCH PARSED DATA DIRECTLY FROM MONGODB CACHE
+    const dataset = await getCachedSessionData(sessionId);
 
     if (!dataset) {
       throw new Error('Workspace cache expired. Please upload the file again.');
     }
 
-    // 1. Data Analyst Phase
     workflow.updateStepStatus('parsing', 'completed');
     workflow.updateStepStatus('analysis', 'running');
     sendSSEEvent('timeline', workflow.getTimelineState());
@@ -58,14 +46,12 @@ router.get('/:sessionId', async (req, res) => {
     const analystResult = await runDataAnalystAgent(dataset);
     workflow.updateStepStatus('analysis', 'completed', analystResult);
     
-    // 2. Business Insights Phase
     workflow.updateStepStatus('insights', 'running');
     sendSSEEvent('timeline', workflow.getTimelineState());
 
     const reportResult = await runReportWriterAgent(analystResult);
     workflow.updateStepStatus('insights', 'completed', reportResult);
 
-    // 3. Visualization Planning Phase
     workflow.updateStepStatus('charts', 'running');
     sendSSEEvent('timeline', workflow.getTimelineState());
 
@@ -73,7 +59,6 @@ router.get('/:sessionId', async (req, res) => {
     const chartPaths = await generateChartImages(sessionId, visualizationConfig.charts || []);
     workflow.updateStepStatus('charts', 'completed');
 
-    // 4. Document Construction Phase
     workflow.updateStepStatus('documents', 'running');
     sendSSEEvent('timeline', workflow.getTimelineState());
 
@@ -81,14 +66,12 @@ router.get('/:sessionId', async (req, res) => {
     const docxPath = await generateExecutiveDOCX(sessionId, reportResult);
     workflow.updateStepStatus('documents', 'completed');
 
-    // 5. PowerPoint Deck Construction Phase
     workflow.updateStepStatus('slides', 'running');
     sendSSEEvent('timeline', workflow.getTimelineState());
 
     const pptxPath = await generatePresentationPPT(sessionId, reportResult, chartPaths);
     workflow.updateStepStatus('slides', 'completed');
 
-    // 6. Packaging/ZIP Phase
     workflow.updateStepStatus('packaging', 'running');
     sendSSEEvent('timeline', workflow.getTimelineState());
 
@@ -104,7 +87,6 @@ router.get('/:sessionId', async (req, res) => {
       zipUrl: `/static/outputs/${sessionId}/${path.basename(zipPath)}`
     };
 
-    // Calculate NeuroScore™
     let emptyCellsCount = 0;
     if (dataset.sheets && dataset.sheets[0]) {
       dataset.sheets[0].rows.forEach(row => {
@@ -186,11 +168,6 @@ router.get('/:sessionId', async (req, res) => {
       artifacts: fileResponsePayload,
       neuroScore 
     });
-
-    // Clear cache safely
-    if (global.workspaceCache) {
-      delete global.workspaceCache[sessionId];
-    }
 
     sendSSEEvent('done', {
       ...workflow.getTimelineState(),

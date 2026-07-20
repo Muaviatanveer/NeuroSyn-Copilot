@@ -7,14 +7,9 @@ import { config } from '../utils/config.js';
 import { parseExcel } from '../parsers/excel.js';
 import { parseCSV } from '../parsers/csv.js';
 import { parsePDF } from '../parsers/pdf.js';
-import { saveFileRecord } from '../services/dbService.js';
+import { saveFileRecord, cacheSessionData } from '../services/dbService.js'; // Added cache import
 
 const router = express.Router();
-
-// Initialize global memory cache safely for Serverless (Vercel) environments
-if (!global.workspaceCache) {
-  global.workspaceCache = {};
-}
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -26,7 +21,7 @@ const storage = multer.diskStorage({
       try {
         fs.mkdirSync(sessionDir, { recursive: true });
       } catch (err) {
-        // Safe to ignore in stateless Serverless environments
+        // Safe to ignore in Serverless
       }
     }
     cb(null, sessionDir);
@@ -75,18 +70,8 @@ router.post('/', upload.single('file'), async (req, res) => {
       }
     };
 
-    // Store in global memory cache (survives Vercel container resets better than /tmp)
-    global.workspaceCache[sessionId] = payloadToSave;
-
-    // Optional Fallback to disk (for local development)
-    const sessionDir = path.join(config.paths.uploads, sessionId);
-    if (fs.existsSync(sessionDir)) {
-      fs.writeFileSync(
-        path.join(sessionDir, 'parsed.json'),
-        JSON.stringify(payloadToSave, null, 2),
-        'utf8'
-      );
-    }
+    // 1. SAVE TO MONGODB CACHE DIRECTLY (Bypasses Vercel memory limits)
+    await cacheSessionData(sessionId, payloadToSave);
 
     await saveFileRecord(userId, {
       sessionId,

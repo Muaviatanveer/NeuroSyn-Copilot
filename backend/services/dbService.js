@@ -1,37 +1,24 @@
 import { connectDB } from '../utils/db.js';
 import { logger } from '../utils/logger.js';
 
-/**
- * Saves uploaded file metadata into the 'files' collection scoped to a user.
- * @param {string} userId - Unique identifier of the individual user.
- * @param {Object} fileData - Ingested file parameters.
- */
 export async function saveFileRecord(userId, fileData) {
   const db = await connectDB();
   if (!db) return null;
-
   try {
     const collection = db.collection('files');
-    const result = await collection.insertOne({
+    return await collection.insertOne({
       userId: userId || 'default_user_workspace',
       ...fileData,
       uploadedAt: new Date()
     });
-    return result;
   } catch (err) {
     logger.error('dbService', `Failed to save file metadata for user: ${userId}`, err);
   }
 }
 
-/**
- * Saves a completed workflow run parameters directly into the 'history' collection scoped to a user.
- * @param {string} userId - Unique identifier of the individual user.
- * @param {Object} record - Executed run coordinates.
- */
 export async function saveHistoryRecord(userId, record) {
   const db = await connectDB();
   if (!db) return null;
-
   try {
     const collection = db.collection('history');
     const result = await collection.insertOne({
@@ -39,29 +26,53 @@ export async function saveHistoryRecord(userId, record) {
       ...record,
       createdAt: new Date()
     });
-    logger.info('dbService', `Persisted task ${record.id} for user ${userId} to MongoDB.`);
+    logger.info('dbService', `Persisted task ${record.id} to MongoDB.`);
     return result;
   } catch (err) {
-    logger.error('dbService', `Failed to insert history log for user: ${userId}`, err);
+    logger.error('dbService', `Failed to insert history log.`, err);
   }
 }
 
-/**
- * Fetches all persistent past runs belonging strictly to the active user.
- * @param {string} userId - Unique identifier of the individual user.
- */
 export async function fetchHistoryLogs(userId) {
   const db = await connectDB();
   if (!db) return [];
-
   const targetUserId = userId || 'default_user_workspace';
-
   try {
     const collection = db.collection('history');
-    // Filter strictly by the active individual user context
     return await collection.find({ userId: targetUserId }).sort({ createdAt: -1 }).toArray();
   } catch (err) {
-    logger.error('dbService', `Failed to retrieve history logs for user: ${userId}`, err);
+    logger.error('dbService', `Failed to retrieve history logs.`, err);
     return [];
+  }
+}
+
+// -------------------------------------------------------------
+// NEW: SERVERLESS MONGODB CACHING FOR VERCEL
+// -------------------------------------------------------------
+export async function cacheSessionData(sessionId, parsedData) {
+  const db = await connectDB();
+  if (!db) return null;
+  try {
+    const collection = db.collection('session_cache');
+    await collection.updateOne(
+      { sessionId },
+      { $set: { sessionId, data: parsedData, createdAt: new Date() } },
+      { upsert: true }
+    );
+  } catch (err) {
+    logger.error('dbService', `Failed to cache session data to MongoDB.`, err);
+  }
+}
+
+export async function getCachedSessionData(sessionId) {
+  const db = await connectDB();
+  if (!db) return null;
+  try {
+    const collection = db.collection('session_cache');
+    const record = await collection.findOne({ sessionId });
+    return record ? record.data : null;
+  } catch (err) {
+    logger.error('dbService', `Failed to retrieve session cache from MongoDB.`, err);
+    return null;
   }
 }
