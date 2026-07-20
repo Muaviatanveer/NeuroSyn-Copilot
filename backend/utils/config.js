@@ -8,7 +8,10 @@ dotenv.config();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const ROOT_DIR = path.resolve(__dirname, '..');
+// Serverless-aware path resolver. If running on Vercel, write to the allowed /tmp directory.
+const isVercel = process.env.VERCEL === '1';
+
+const ROOT_DIR = isVercel ? '/tmp' : path.resolve(__dirname, '..');
 const WORKSPACE_DIR = path.join(ROOT_DIR, 'workspace');
 const UPLOADS_DIR = path.join(WORKSPACE_DIR, 'uploads');
 const OUTPUTS_DIR = path.join(WORKSPACE_DIR, 'outputs');
@@ -21,7 +24,11 @@ const initializeDirectories = () => {
   const dirs = [WORKSPACE_DIR, UPLOADS_DIR, OUTPUTS_DIR];
   dirs.forEach(dir => {
     if (!fs.existsSync(dir)) {
-      fs.mkdirSync(dir, { recursive: true });
+      try {
+        fs.mkdirSync(dir, { recursive: true });
+      } catch (err) {
+        console.warn(`[Config Warning]: Could not create directory ${dir}. This is normal in serverless environments.`, err.message);
+      }
     }
   });
 };
@@ -31,7 +38,7 @@ initializeDirectories();
 export const config = {
   PORT,
   OPENAI_API_KEY,
-  mongodbUri: MONGODB_URI, // Exposed globally in the backend config
+  mongodbUri: MONGODB_URI,
   paths: {
     root: ROOT_DIR,
     workspace: WORKSPACE_DIR,
