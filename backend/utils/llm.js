@@ -8,14 +8,14 @@ const isOpenAIActive = !isGeminiActive && !!process.env.OPENAI_API_KEY;
 
 // 1. Resolve base URL dynamically
 const baseURL = isGeminiActive
-  ? 'https://generativelanguage.googleapis.com/v1beta/openai' // Gemini OpenAI-Compatible Endpoint
+  ? 'https://generativelanguage.googleapis.com/v1beta/openai'
   : isOpenAIActive
     ? 'https://api.openai.com/v1'
     : (process.env.LOCAL_LLM_BASE_URL || 'http://localhost:11434/v1');
 
 // 2. Resolve target model name dynamically
 const modelName = isGeminiActive
-  ? (process.env.GEMINI_MODEL || 'gemini-3.5-flash') // Fast, high-accuracy model
+  ? (process.env.GEMINI_MODEL || 'gemini-1.5-flash')
   : isOpenAIActive
     ? (process.env.OPENAI_MODEL || 'gpt-4o-mini')
     : (process.env.LOCAL_LLM_MODEL || 'deepseek-r1:14b');
@@ -40,11 +40,16 @@ const client = new OpenAI({
  */
 export async function getLocalLLMCompletion(messages, options = {}) {
   try {
+    // Dynamically omit response_format for Gemini since it is not supported in their beta endpoint
+    const response_format = (options.jsonMode && !isGeminiActive) 
+      ? { type: 'json_object' } 
+      : undefined;
+
     const response = await client.chat.completions.create({
       model: modelName,
       messages,
       temperature: options.temperature ?? 0.2,
-      response_format: options.jsonMode ? { type: 'json_object' } : undefined,
+      response_format, // Only passed if not Gemini
       ...options
     });
 
